@@ -4,8 +4,6 @@ Expense Tracker API built with Express and Mongoose.
 
 ## Features
 
----
-
 - User Registration
 - User Authentication
 - Update User information
@@ -22,8 +20,6 @@ Expense Tracker API built with Express and Mongoose.
 - Sum all expenses for a particular date range
 
 ## Constraints
-
----
 
 1. Protect endpoints using JWT
 2. Expense categories:
