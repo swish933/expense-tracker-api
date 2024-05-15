@@ -1,5 +1,6 @@
-const User = require("../database/schemas/user.schema");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const User = require("../database/schemas/user.schema");
 const { ErrorWithStatus } = require("../exceptions/error_with_status");
 
 const signup = async (email, username, password) => {
@@ -20,4 +21,34 @@ const signup = async (email, username, password) => {
 	return newUser;
 };
 
-module.exports = { signup };
+const login = async (userInfo, password) => {
+	const user = await User.findOne({
+		$or: [{ email: userInfo }, { username: userInfo }],
+	});
+
+	if (!user) {
+		throw new ErrorWithStatus("User not found. Please sign up", 404);
+	}
+
+	const isValidPassword = await bcrypt.compare(password, user.password);
+
+	if (!isValidPassword) {
+		throw new ErrorWithStatus("Username/Email or Password is incorrect", 401);
+	}
+
+	const JWT_SECRET = process.env.JWT_SECRET;
+
+	const token = jwt.sign(
+		{
+			id: user._id,
+			sub: user._id,
+			email: user.email,
+		},
+		JWT_SECRET,
+		{ expiresIn: "1h" }
+	);
+
+	return { accessToken: token, user };
+};
+
+module.exports = { signup, login };
