@@ -8,5 +8,11 @@ const { PORT } = process.env;
 
 connectToMongoDB();
 
+app.use((err, req, res, next) => {
+	console.log(err);
+	res.status(err.status || 500);
+	res.json({ error: err.message });
+});
+
 app.get("/", (req, res) => res.send("Hello World!"));
-app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
+app.listen(PORT, () => console.log(`Server listening on port ${PORT}!`));
