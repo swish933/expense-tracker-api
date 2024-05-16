@@ -11,4 +11,14 @@ const getUser = async (userId) => {
 	return user;
 };
 
-module.exports = { getUser };
+const updateUser = async (userId, dto) => {
+	const updatedUserInfo = await User.findByIdAndUpdate(
+		userId,
+		{ ...dto },
+		{ new: true }
+	);
+
+	return updatedUserInfo;
+};
+
+module.exports = { getUser, updateUser };
