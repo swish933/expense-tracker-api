@@ -27,6 +27,7 @@ const updateUser = async (userId, dto) => {
 	} catch (error) {
 		throw new ErrorWithStatus(error.message, 500);
 	}
+
 };
 
 module.exports = { getUser, updateUser };
