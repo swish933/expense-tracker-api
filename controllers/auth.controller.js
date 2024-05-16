@@ -1,6 +1,6 @@
 const authService = require("../services/auth.service");
 
-const signup = async (req, res) => {
+const signup = async (req, res, next) => {
 	try {
 		const { email, username, password } = req.body;
 
@@ -11,30 +11,21 @@ const signup = async (req, res) => {
 			data: newUser,
 		});
 	} catch (error) {
-		console.error(error);
-
-		res.status(error.status || 500);
-
-		res.json({ error: error.message });
+		next(error);
 	}
 };
 
-const login = async (req, res) => {
-    try {
-        const { email, username, password } = req.body;
-        const userInfo = !email ? username : email;
+const login = async (req, res, next) => {
+	try {
+		const { email, username, password } = req.body;
+		const userInfo = !email ? username : email;
 
-        const { accessToken, user } = await authService.login(userInfo, password);
-        
-        res.json({message: "login successful", data: {accessToken, user}})
-        
-    } catch (error) {
-        console.error(error);
+		const { accessToken, user } = await authService.login(userInfo, password);
 
-		res.status(error.status || 500);
-
-		res.json({ error: error.message });
-    }
-}
+		res.json({ message: "login successful", data: { accessToken, user } });
+	} catch (error) {
+		next(error);
+	}
+};
 
 module.exports = { signup, login };
