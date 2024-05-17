@@ -9,7 +9,9 @@ expenseRouter.get(
   queryValidation,
   expenseController.getAllExpenses
 );
+expenseRouter.get('/expenses/categories', expenseController.getCategories);
 expenseRouter.get('/expenses/:id', expenseController.getExpense);
+expenseRouter.get('/expenses', expenseController.getAllExpenses);
 expenseRouter.post('/expenses', expenseController.createExpense);
 expenseRouter.patch('/expenses/:id', expenseController.updateExpense);
 expenseRouter.delete('/expenses/:id', expenseController.deleteExpense);

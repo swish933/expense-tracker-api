@@ -1,23 +1,24 @@
 const joi = require('joi');
+const { validCategories } = require('../database/schemas/expense.schema');
 
-const signupValidation = async (req, res, next) => {
+const createExpenseValidation = async (req, res, next) => {
   try {
     const schema = joi.object({
-      email: joi.string().email().required(),
-      username: joi.string(),
-      password: joi.string().min(6).required(),
-      confirmPassword: joi
-        .any()
-        .valid(joi.ref('password'))
+      title: joi.string().trim(),
+      description: joi.string().trim(),
+      amount: joi.number().required().min(0),
+      date: joi.date().required(),
+      category: joi
+        .string()
         .required()
-        .error(new Error('Passwords do not match')),
+        .valid(...validCategories),
     });
 
     await schema.validateAsync(req.body);
 
     next();
   } catch (error) {
-    return res.status(422).json({ message: error.message, success: false });
+    return res.status(422).json({ success: false, message: error.message });
   }
 };
 
@@ -29,14 +30,16 @@ const queryValidation = async (req, res, next) => {
       limit: joi.number().integer().min(1),
       order_by: joi.string().valid('created_at', 'updated_at', 'amount'),
       order: joi.string().valid('asc', 'desc'),
+      startDate: joi.date(),
+      endDate: joi.date(),
     });
 
     await schema.validateAsync(req.query);
 
     next();
   } catch (error) {
-    return res.status(422).json({ message: error.message, success: false });
+    return res.status(422).json({ success: false, message: error.message });
   }
 };
 
-module.exports = { signupValidation, queryValidation };
+module.exports = { createExpenseValidation, queryValidation };

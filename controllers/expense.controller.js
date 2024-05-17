@@ -1,14 +1,20 @@
+const { validCategories } = require('../database/schemas/expense.schema');
 const expenseService = require('../services/expense.service');
+
+const getCategories = async (req, res) => {
+  return res.json({
+    message: 'Categories retrieval successful',
+    data: validCategories,
+  });
+};
 
 const createExpense = async (req, res) => {
   try {
-    const userId = req.user._id;
-    console.log('The payload is ', req.body);
-    const { titile, username, password } = req.body;
+    const userId = req.user.id;
 
     const newExpense = await expenseService.createExpense(userId, req.body);
 
-    res.json({
+    res.status(201).json({
       message: 'Expense added succesfully',
       data: newExpense,
     });
@@ -23,7 +29,7 @@ const createExpense = async (req, res) => {
 const getExpense = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const expense = await expenseService.getExpenseById(id, userId);
 
@@ -39,22 +45,25 @@ const getExpense = async (req, res) => {
 
 const getAllExpenses = async (req, res) => {
   try {
-    // const values = validate(queryParamSchema, req.query);
     const {
       page = 1,
       limit = 10,
       order = 'asc',
       order_by = 'created_at',
+      startDate,
+      endDate,
     } = req.query;
 
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const { expenses, metadata } = await expenseService.getAllExpenses(
       page,
       limit,
       order,
       order_by,
-      userId
+      userId,
+      startDate,
+      endDate
     );
 
     const message = metadata.totalPages
@@ -79,7 +88,7 @@ const getAllExpenses = async (req, res) => {
 const updateExpense = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const expense = await expenseService.updateExpense(id, userId, payload);
 
@@ -95,7 +104,7 @@ const updateExpense = async (req, res) => {
 const deleteExpense = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const expense = await expenseService.deleteExpense(id, userId);
 
@@ -109,6 +118,7 @@ const deleteExpense = async (req, res) => {
   }
 };
 module.exports = {
+  getCategories,
   getExpense,
   getAllExpenses,
   createExpense,

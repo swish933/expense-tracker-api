@@ -20,9 +20,7 @@ const isAuthenticated = (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error(error);
-
-    return res.status(401).send({ message: 'Unauthorized' });
+    return res.status(401).send({ message: error.message || 'Unauthorized' });
   }
 };
 

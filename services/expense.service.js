@@ -1,18 +1,38 @@
-const Expense = require('../database/schemas/expense.schema');
+const { Types } = require('mongoose');
+const { Expense } = require('../database/schemas/expense.schema');
 const { ErrorWithStatus } = require('../exceptions/error_with_status');
+const { query } = require('express');
 
 const getExpenseById = async (id) => {
-  const expense = await Expense.findOne({ _id: id }).populate('user');
+  const expense = await Expense.findOne({ _id: id });
   if (!expense) throw new ErrorWithStatus('Expense does not exist', 404);
   return expense;
 };
 
-const getAllExpenses = async (page, limit, order, order_by, userId) => {
-  const query = { user: userId };
+const getAllExpenses = async (
+  page,
+  limit,
+  order,
+  order_by,
+  userId,
+  startDate,
+  endDate
+) => {
+  const query = { user: new Types.ObjectId(userId) };
   const skip = (page - 1) * limit;
 
+  if (startDate || endDate) {
+    query.date = {};
+    if (startDate) {
+      query.date.$gte = new Date(startDate);
+    }
+    if (endDate) {
+      query.date.$gte = new Date(endDate);
+    }
+  }
+  // console.log(query);
+
   const expenses = await Expense.find(query)
-    .populate('user')
     .skip(skip)
     .limit(limit)
     .sort([[order_by, order]]);
@@ -23,11 +43,15 @@ const getAllExpenses = async (page, limit, order, order_by, userId) => {
     { $match: query },
     { $group: { _id: null, totalAmount: { $sum: '$amount' } } },
   ]);
+
+  const totalExpense =
+    totalExpenseAmount.length > 0 ? totalExpenseAmount[0].totalAmount : 0;
+
   const totalPages = Math.ceil(totalCount / limit);
   const metadata = {
     page,
     limit,
-    totalAmount: totalExpenseAmount[0].totalAmount,
+    totalAmount: totalExpense,
     totalPages,
     totalCount,
     hasPreviousPage: page > 1,
@@ -45,11 +69,10 @@ const createExpense = async (userId, payload) => {
     await expense.save();
     return expense;
   } catch (err) {
-    console.log(err);
     // if (err.code === 11000) {
     //   throw new Conflict('Expense with same title already exists');
     // }
-    throw new ErrorWithStatus('Something went wrong', 500);
+    throw new ErrorWithStatus(err.message || 'Something went wrong', 500);
   }
 };
 
@@ -61,7 +84,7 @@ const updateExpense = async (expenseId, userId, payload) => {
     { _id: expenseId, user: userId },
     { $set: payload },
     { new: true }
-  ).populate('user');
+  );
 
   if (!expense)
     throw new ErrorWithStatus('Not authorized to update this expense', 403);
@@ -75,7 +98,7 @@ const deleteExpense = async (expenseId, userId) => {
   const expense = await Expense.findOneAndDelete({
     _id: expenseId,
     user: userId,
-  }).populate('user');
+  });
   if (!expense)
     throw new ErrorWithStatus('Not authorized to delete expense', 403);
 
