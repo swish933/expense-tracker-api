@@ -4,6 +4,7 @@ const authRouter = require('./routers/auth.router.js');
 const expenseRouter = require('./routers/expense.router.js');
 const isAuthenticated = require('./middlewares/auth.middleware');
 const morgan = require('morgan');
+const userRouter = require('./routers/user.router');
 
 require('dotenv').config();
 
@@ -14,6 +15,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 app.use('/api/auth', authRouter);
+app.use('api/me', userRouter);
 app.use(isAuthenticated);
 app.use('/api', expenseRouter);
 
@@ -24,4 +26,5 @@ app.use((err, req, res, next) => {
 });
 
 connectToMongoDB();
+
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}!`));

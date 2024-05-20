@@ -35,7 +35,7 @@ const loginValidation = async (req, res, next) => {
 
 		next();
 	} catch (error) {
-		return res.status(422).json({ message: error.message, success: false });
+		return res.status(422).json({ error: error.message, success: false });
 	}
 };
 
