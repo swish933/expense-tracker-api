@@ -1,14 +1,18 @@
 const { validCategories } = require('../database/schemas/expense.schema');
 const expenseService = require('../services/expense.service');
 
-const getCategories = async (req, res) => {
-  return res.json({
-    message: 'Categories retrieval successful',
-    data: validCategories,
-  });
+const getCategories = async (req, res, next) => {
+  try {
+    return res.json({
+      message: 'Categories retrieval successful',
+      data: validCategories,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-const createExpense = async (req, res) => {
+const createExpense = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
@@ -19,14 +23,10 @@ const createExpense = async (req, res) => {
       data: newExpense,
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(error.status || 500);
-
-    res.json({ error: error.message });
+    next(error);
   }
 };
-const getExpense = async (req, res) => {
+const getExpense = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -35,15 +35,11 @@ const getExpense = async (req, res) => {
 
     res.json({ message: 'Expense retrieval successful', data: expense });
   } catch (error) {
-    console.error(error);
-
-    res.status(error.status || 500);
-
-    res.json({ error: error.message });
+    next(error);
   }
 };
 
-const getAllExpenses = async (req, res) => {
+const getAllExpenses = async (req, res, next) => {
   try {
     const {
       page = 1,
@@ -77,15 +73,11 @@ const getAllExpenses = async (req, res) => {
       metadata,
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(error.status || 500);
-
-    res.json({ error: error.message });
+    next(error);
   }
 };
 
-const updateExpense = async (req, res) => {
+const updateExpense = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -94,14 +86,11 @@ const updateExpense = async (req, res) => {
 
     res.json({ message: 'Expense update successful', data: expense });
   } catch (error) {
-    console.error(error);
-
-    res.status(error.status || 500);
-
-    res.json({ error: error.message });
+    next(error);
   }
 };
-const deleteExpense = async (req, res) => {
+
+const deleteExpense = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -110,11 +99,7 @@ const deleteExpense = async (req, res) => {
 
     res.status(204).json();
   } catch (error) {
-    console.error(error);
-
-    res.status(error.status || 500);
-
-    res.json({ error: error.message });
+    next(error);
   }
 };
 module.exports = {

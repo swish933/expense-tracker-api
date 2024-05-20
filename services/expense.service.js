@@ -1,10 +1,9 @@
 const { Types } = require('mongoose');
 const { Expense } = require('../database/schemas/expense.schema');
 const { ErrorWithStatus } = require('../exceptions/error_with_status');
-const { query } = require('express');
 
-const getExpenseById = async (id) => {
-  const expense = await Expense.findOne({ _id: id });
+const getExpenseById = async (id, userId) => {
+  const expense = await Expense.findOne({ _id: id, user: userId });
   if (!expense) throw new ErrorWithStatus('Expense does not exist', 404);
   return expense;
 };

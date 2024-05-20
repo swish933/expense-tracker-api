@@ -22,6 +22,24 @@ const createExpenseValidation = async (req, res, next) => {
   }
 };
 
+const updateExpenseValidation = async (req, res, next) => {
+  try {
+    const schema = joi.object({
+      title: joi.string().trim(),
+      description: joi.string().trim(),
+      amount: joi.number().min(0),
+      date: joi.date(),
+      category: joi.string().valid(...validCategories),
+    });
+
+    await schema.validateAsync(req.body);
+
+    next();
+  } catch (error) {
+    return res.status(422).json({ success: false, message: error.message });
+  }
+};
+
 const queryValidation = async (req, res, next) => {
   try {
     const schema = joi.object({
@@ -42,4 +60,8 @@ const queryValidation = async (req, res, next) => {
   }
 };
 
-module.exports = { createExpenseValidation, queryValidation };
+module.exports = {
+  createExpenseValidation,
+  updateExpenseValidation,
+  queryValidation,
+};
